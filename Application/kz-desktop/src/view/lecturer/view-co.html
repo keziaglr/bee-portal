@@ -29,14 +29,6 @@
                         </div>
                       </li>
                 </ul>
-                <ul style="list-style: none">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" id="menu" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Lecturer</a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="../login-page.html">Log Out</a>
-                        </div>
-                    </li>
-                </ul>
             </div>
             </div>
         </nav>
@@ -44,13 +36,13 @@
 
     <ul class="nav nav-tabs" style="margin-top: 50px;">
         <li class="nav-item">
-          <a class="nav-link" href="./view-co.html">Course Outline</a>
+          <a class="nav-link active" href="./view-co.html">Course Outline</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="./view-forum.html">Forum</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" href="./view-student.html">Student</a>
+            <a class="nav-link" href="./view-student.html">Student</a>
           </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Assignment</a>
@@ -63,24 +55,27 @@
         </li>
       </ul>
       <div id="myTabContent" class="tab-content">
-        <h2 style="margin-top: 75px;"> <strong class="d-flex justify-content-center" >View Student</strong> </h2>
-        <table class="table table-hover">
-            <thead>
-            <tr>
-                <th scope="col">Student ID</th>
-                <th scope="col">Student Name</th>
-            </tr>
-            </thead>
-            <tbody id="stud">
-            <template id="stud-template">
-                <tr>
-                    <td scope="col" id="stud-id">class code</td>
-                    <td scope="col" id="stud-name">course name</td>
-                </tr>
-            </template>
-            </tbody>
-        </table>
+        <div class="tab-pane fade show active">
+            <h2 style="margin-top: 75px;"> <strong class="d-flex justify-content-center" >View Course Outline</strong> </h2>
+            <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th scope="col">Session</th>
+                    <th scope="col">Material Name</th>
+                  </tr>
+                </thead>
+                <tbody id="course-outline">
+                  <template id="session-template">
+                      <tr>
+                          <td scope="col" id="session">class code</td>
+                          <td scope="col" id="material-name">course name</td>
+                      </tr>
+                  </template>
+                </tbody>
+              </table>
         </div>
+      </div>
+
   </body>
   <script type="module">
     import { Firestore, collection, getDocs, getDoc, doc, query, getFirestore, where } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js'
@@ -88,34 +83,30 @@
 
     const db = getFirestore(firebaseApp);
     
+    // document.querySelector('#search-btn').addEventListener('click',
+
     window.onload = async () => {
         var ClassID = sessionStorage.getItem('currClassID');
-        const q = query(collection(db, "classDetail"), where("ClassID", "==", ClassID));
+
+        const docClass = await getDoc(doc(db, "classes", ClassID));
+        const { CourseID } = docClass.data()
+
+        const q = query(collection(db, "courseSession"), where("CourseID", "==", CourseID));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((query) => {
             console.log(query.data())
-            const { StudentNumber } = query.data()
-            
-            async function test(){
-                const docStud = await getDoc(doc(db, "students", StudentNumber));
-                const { StudentName } = docStud.data()
+            const { MaterialName, Session } = query.data()
 
+            let body = document.querySelector('#course-outline')
+            let template = document.querySelector('#session-template')
+            const clone = template.content.cloneNode(true)
+            const session = clone.querySelector('#session')
+            const material_name = clone.querySelector('#material-name')
 
-                let bodyStud = document.querySelector('#stud')
-                let templateStud = document.querySelector('#stud-template')
-                const cloneStud = templateStud.content.cloneNode(true)
-                const stud_id = cloneStud.querySelector('#stud-id')
-                const stud_name = cloneStud.querySelector('#stud-name')
+            session.textContent = Session
+            material_name.textContent = MaterialName
 
-                stud_id.textContent = StudentNumber
-                stud_name.textContent = StudentName
-
-
-                bodyStud.appendChild(cloneStud)
-            }
-            test().catch((e)=>{
-                console.log(e.message)
-            });
+            body.appendChild(clone)
         })
     };
 

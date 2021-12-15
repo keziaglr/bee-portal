@@ -19,6 +19,15 @@
                     <li class="nav-item">
                         <a class="nav-link" href="./view-teaching-schedule.html">View Teaching Schedule</a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Assignment</a>
+                        <div class="dropdown-menu">
+                          <a class="dropdown-item" href="./create-group-assignment.html">Create Group Assignment</a>
+                          <a class="dropdown-item" href="./create-individual-assignment.html">Create Individual Assignment</a>
+                          <div class="dropdown-divider"></div>
+                          <a class="dropdown-item" href="./create-group.html">Create Group</a>
+                        </div>
+                      </li>
                 </ul>
                 <ul style="list-style: none">
                     <li class="nav-item dropdown">
@@ -52,7 +61,7 @@
                     <td scope="col" id="day">class code</td>
                     <td scope="col" id="start">course name</td>
                     <td scope="col" id="end">class code</td>
-                    <td scope="col" id="detailBtn"><button class="btn my-2 my-sm-0 btn-outline-dark" type="submit" id="search-btn">Detail</button></td>
+                    <td scope="col" id="detail-btn"><button class="btn my-2 my-sm-0 btn-outline-dark" type="submit" id="detail-btn">Detail</button></td>
                 </tr>
             </template>
           </tbody>
@@ -92,11 +101,10 @@
                 day.textContent = Day
                 start.textContent = Start
                 end.textContent = End
-                body.appendChild(clone)
 
-                clone.querySelector('#detailBtn').addEventListener('click', () => {
-                    sessionStorage.setItem("currClassID", ClassID);
-                    window.location.assign('./view-course-syllabus.html')
+                clone.querySelector('#detail-btn').addEventListener('click', () => {
+                    sessionStorage.setItem("currClassID", query.id);
+                    window.location.assign('./view-co.html')
                 });
 
                 body.appendChild(clone)
