@@ -37,7 +37,7 @@
     </header>
     <ul class="nav nav-tabs" style="margin-top: 50px;">
         <li class="nav-item">
-          <a class="nav-link active" href="./view-course-syllabus.html">Course Syllabus</a>
+          <a class="nav-link" href="./view-course-syllabus.html">Course Syllabus</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="./view-forum.html">Forum</a>
@@ -46,39 +46,52 @@
             <a class="nav-link" href="./view-lecturer-students.html">Lecturer & Students</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="./view-assignment.html">Assignment</a>
+            <a class="nav-link active" href="./view-assignment.html">Assignment</a>
           </li>
       </ul>
       <div id="myTabContent" class="tab-content">
     <div style="margin-top: 75px;">
-        <h2> <strong class="d-flex justify-content-center" >View Class/Course Syllabus</strong> </h2>
+        <h2> <strong class="d-flex justify-content-center" >Individual Assignment</strong> </h2>
         <table class="table table-hover">
             <thead>
               <tr>
-                <th scope="col">Class Code</th>
-                <th scope="col">Course Name</th>
-                <th scope="col">Course Syllabus</th>
-                <th scope="col">Course Credit</th>
-                <th scope="col">Assignment Score Percentage</th>
-                <th scope="col">Final Exam Score Percentage</th>
-                <th scope="col">Mid Exam Score Percentage</th>
+                <th scope="col">Title</th>
+                <th scope="col">Case</th>
+                <th scope="col">Answer</th>
               </tr>
             </thead>
-            <tbody id="classes">
-              <template id="class-template">
+            <tbody id="asg">
+              <template id="asg-template">
                   <tr>
-                      <td scope="col" id="class-code">class code</td>
-                      <td scope="col" id="course-name">course name</td>
-                      <td scope="col" id="course-syllabus">class code</td>
-                      <td scope="col" id="course-credit">course name</td>
-                      <td scope="col" id="asg">class code</td>
-                      <td scope="col" id="final">class code</td>
-                      <td scope="col" id="mid">class code</td>
+                      <td scope="col" id="title">class code</td>
+                      <td scope="col" id="case">course name</td>
+                      <td scope="col" id="answer"><input class="form-control" type="file" id="formFile"></td>
                   </tr>
               </template>
             </tbody>
           </table>
           </div>
+          <div style="margin-top: 75px;">
+            <h2> <strong class="d-flex justify-content-center" >Group Assignment</strong> </h2>
+            <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col">Case</th>
+                    <th scope="col">Answer</th>
+                  </tr>
+                </thead>
+                <tbody id="asg-group">
+                  <template id="asg-group-template">
+                      <tr>
+                          <td scope="col" id="title-group">class code</td>
+                          <td scope="col" id="case-group">course name</td>
+                          <td scope="col" id="answer-group"><input class="form-control" type="file" id="formFile"></td>
+                      </tr>
+                  </template>
+                </tbody>
+              </table>
+              </div>
     </div>
   </body>
   <script type="module">
@@ -86,42 +99,43 @@
     import { firebaseApp } from '../../firebase.js'
 
     const db = getFirestore(firebaseApp)
-
+    var ClassID = sessionStorage.getItem('currClassID');
+    
     window.onload = async () => {
-        var ClassID = sessionStorage.getItem('currClassID');
-        const docClass = await getDoc(doc(db, "classes", ClassID));
-        
-        const { CourseID } = docClass.data()
-        // console.log(docClass.data())
-        async function test() {
-            const docCourse = await getDoc(doc(db, "courses", CourseID));
-            // console.log(docCourse.data())
-            const { CourseName, CourseSyllabus, CourseCredit, AssignmentScorePercentage, MidExamScorePercentage, FinalExamScorePercentage } = docCourse.data()
+      const q = query(collection(db, "individualAssignment"), where("ClassID", "==", ClassID));
+      const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((query) => {
+          console.log(query.data())
+            const { Title, Case } = query.data()
 
-            let body = document.querySelector('#classes')
-            let template = document.querySelector('#class-template')
+            let body = document.querySelector('#asg')
+            let template = document.querySelector('#asg-template')
             const clone = template.content.cloneNode(true)
-            const course_name = clone.querySelector('#course-name')
-            const class_code = clone.querySelector('#class-code')
-            const course_syllabus = clone.querySelector('#course-syllabus')
-            const course_credit = clone.querySelector('#course-credit')
-            const asg = clone.querySelector('#asg')
-            const final = clone.querySelector('#final')
-            const mid = clone.querySelector('#mid')
+            const title = clone.querySelector('#title')
+            const case_clone = clone.querySelector('#case')
 
-            class_code.textContent = ClassID
-            course_name.textContent = CourseName
-            course_syllabus.textContent = CourseSyllabus
-            course_credit.textContent = CourseCredit
-            asg.textContent = AssignmentScorePercentage
-            final.textContent = FinalExamScorePercentage
-            mid.textContent = MidExamScorePercentage
+            title.textContent = Title
+            case_clone.textContent = Case
 
             body.appendChild(clone)
-        }
+        });
 
-        test().catch((e)=>{
-            console.log(e.message)
+        const w = query(collection(db, "groupAssignment"), where("ClassID", "==", ClassID));
+        const querySnapshot1 = await getDocs(w);
+        querySnapshot1.forEach((query) => {
+          console.log(query.data())
+            const { Title, Case } = query.data()
+
+            let body = document.querySelector('#asg-group')
+            let template = document.querySelector('#asg-group-template')
+            const clone = template.content.cloneNode(true)
+            const title = clone.querySelector('#title-group')
+            const case_clone = clone.querySelector('#case-group')
+
+            title.textContent = Title
+            case_clone.textContent = Case
+
+            body.appendChild(clone)
         });
     }
 

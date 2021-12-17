@@ -40,13 +40,13 @@
           <a class="nav-link" href="./view-co.html">Course Outline</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" href="./view-forum.html">Forum</a>
+            <a class="nav-link" href="./view-forum.html">Forum</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="./view-student.html">Student</a>
           </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Assignment</a>
+          <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Assignment</a>
           <div class="dropdown-menu">
             <a class="dropdown-item" href="./view-assignment.html">Assignment</a>
             <div class="dropdown-divider"></div>
@@ -58,16 +58,23 @@
       <div id="myTabContent" class="tab-content">
             <div class="form" style="margin: 50px 100px">
                 <div class="form-group">
-                    <h2> <strong class="d-flex justify-content-center" style="margin-top: 75px;" >Forum</strong> </h2>
+                    <h2> <strong class="d-flex justify-content-center" style="margin-top: 75px;" >Create Assignment</strong> </h2>
                     <label class="form-label mt-4" >Title</label>
                     <div class="form-floating">
-                        <input type="text" class="form-control" name="text" id="title-forum">
+                        <input type="text" class="form-control" name="text" id="title-asg">
                         <label for="floatingInput">Title</label>
                     </div>
-                    <label class="form-label mt-4" >Comment</label>
+                    <label class="form-label mt-4" >Case</label>
                     <div class="form-floating">
-                        <input type="text" class="form-control" name="text" id="comment-forum">
-                        <label for="floatingInput">Comment</label>
+                        <input type="text" class="form-control" name="text" id="case-asg">
+                        <label for="floatingInput">Case</label>
+                    </div>
+                    <div class="form-group">
+                      <label for="exampleSelect1" class="form-label mt-4">Assignment</label>
+                      <select class="form-select" id="asg-jenis">
+                        <option value="Groupaa">Groupaaa</option>
+                        <option value="Individual">Individual</option>
+                      </select>
                     </div>
                     </div>
                     <input style="margin: 25px 0" type="submit" class="btn btn-primary" id="submitBtn" value="Submit">
@@ -81,18 +88,42 @@
 
     const db = getFirestore(firebaseApp)
     var ClassID = sessionStorage.getItem('currClassID');
-
-    document.querySelector('#submitBtn').addEventListener('click', async() => {        
-        var userID =  sessionStorage.getItem('currLecturer');
-
-        const docRef = await addDoc(collection(db, "forum"), {
+    
+    document.querySelector('#submitBtn').addEventListener('click', async() => {       
+      var asg = document.getElementById('asg-jenis').value
+      if(asg == "Individual"){
+        console.log('Individual')
+        const docRef = await addDoc(collection(db, "individualAssignment"), {
             ClassID: ClassID,
-            Title: document.getElementById('title-forum').value,
-            Comment: document.getElementById('comment-forum').value,
-            UserID: userID
+            Title: document.getElementById('title-asg').value,
+            Case: document.getElementById('case-asg').value,
+            Answer: 'asd'
+        })
+      }else if(asg == "Group"){
+        console.log('Group')
+        const q = query(collection(db, "group"), where("ClassID", "==", ClassID));
+
+        const querySnapshot = await getDocs(q);
+        var flag = false;
+        querySnapshot.forEach((doc) => {
+            if(doc.data() != null){
+                flag = true
+            }
         });
 
-        window.location.assign('./view-forum.html')
+        if(flag == true) {
+          const docRef = await addDoc(collection(db, "groupAssignment"), {
+              ClassID: ClassID,
+              Title: document.getElementById('title-asg').value,
+              Case: document.getElementById('case-asg').value,
+              Answer: 'asd'
+          })
+        }else{
+          alert('You must create group first!')
+          window.location.assign('./create-group.html')
+        }
+      }
+        window.location.assign('./view-assignment.html')
     })
 
   </script>

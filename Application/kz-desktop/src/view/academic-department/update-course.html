@@ -34,7 +34,7 @@
     </header>
     <div class="form" style="margin: 50px 100px">
         <div class="form-group">
-            <h2> <strong class="d-flex justify-content-center" style="margin-top: 75px;" >Insert Course</strong> </h2>
+            <h2> <strong class="d-flex justify-content-center" style="margin-top: 75px;" >Update Course</strong> </h2>
             <label class="form-label mt-4" >Course Name</label>
             <div class="form-floating">
                 <input type="text" class="form-control" name="text" id="course-name">
@@ -100,6 +100,16 @@
     import { firebaseApp } from '../../firebase.js'
 
     const db = getFirestore(firebaseApp)
+
+    var CourseID = sessionStorage.getItem("currCourse");
+
+    window.onload = async() => {
+        const docRef = doc(db, "courses", CourseID);
+        const docSnap = await getDoc(docRef);
+        const { CourseName } = docSnap.data()
+        
+        document.getElementById("course-name").setAttribute("value", CourseName);
+    }
     
     document.querySelector('#submitBtn').addEventListener('click', async() => {      
         var ClassID = sessionStorage.getItem('currClassID');
@@ -138,7 +148,8 @@
                 materials.push(Material5)
             }
 
-            const docRef = await addDoc(collection(db, "courses"), {
+            const courseRef = doc(db, "courses", CourseID);
+            await updateDoc(courseRef, {
                 CourseName: CourseName,
                 CourseCredit: CourseCredit,
                 CourseSyllabus: CourseSyllabus,
@@ -147,15 +158,19 @@
                 FinalExamScorePercentage: FinalScore
             });
 
-            for (let i = 0; i < materials.length; i++) {
-                await addDoc(collection(db, "courseSession"), {
-                    CourseID: docRef.id,
+            const q = query(collection(db, "courseSession"), where("CourseID", "==", CourseID));
+            const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((query) => {
+                var sez = 1;
+                const { MaterialName, Session } = query.data()
+                const courseSessionRef = doc(db, "courseSession", query.id);
+                await updateDoc(courseSessionRef, {
                     MaterialName: materials[i],
-                    Session: i,
+                    Session: sez
                 });
-            }
+                sez++
+            })
         }  
-
         window.location.assign('./academic-home.html')
     })
 

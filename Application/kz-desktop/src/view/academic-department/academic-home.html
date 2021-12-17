@@ -24,7 +24,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" id="menu" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Academic Department</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="">Log Out</a>
+                            <a class="dropdown-item" href="../login-page.html">Log Out</a>
                         </div>
                     </li>
                 </ul>
@@ -32,19 +32,35 @@
             </div>
         </nav>
     </header>
-    <div style="justify-content: space-between;">
-        <div class="card" style="width: 18rem;" id="courses" style="justify-content: space-between;">
-            <template class="card-body" id="course-template">
-                <h5 class="card-title" id="course-name"> course name </h5>
-                <p class="card-text" id="course-syllabus"> course syllabus </p>
-                <p class="card-text" id="course-credit"> course credit </p>
-                <div class="row">
-                    <a href="" class="btn btn-warning" style="margin-bottom: 20px">Update</a>
-                    <a href="" class="btn btn-danger" id="delete">Delete</a>
-                </div>
-            </div>
-        </template>
-    </div>
+
+    <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">Course Name</th>
+            <th scope="col">Course Syllabus</th>
+            <th scope="col">Course Credit</th>
+            <th scope="col">Assignment Score Percentage</th>
+            <th scope="col">Mid Exam Score Percentage</th>
+            <th scope="col">Final Exam Score Percentage</th>
+          </tr>
+        </thead>
+        <tbody id="courses">
+          <template id="course-template">
+              <tr>
+                  <td scope="col" id="course-name">class code</td>
+                  <td scope="col" id="course-syllabus">course name</td>
+                  <td scope="col" id="course-credit">class code</td>
+                  <td scope="col" id="asg-score">course name</td>
+                  <td scope="col" id="mid-score">class code</td>
+                  <td scope="col" id="final-score">course name</td>
+                  <td scope="col" >
+                    <a href="" class="btn btn-warning" id="update-btn">Update</a>
+                    <a href="" class="btn btn-danger" id="delete-btn">Delete</a>
+                  </td>
+              </tr>
+          </template>
+        </tbody>
+      </table>
   </body>
   <script type="module">
     import { Firestore, collection, getDocs, doc, deleteDoc, getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js'
@@ -55,8 +71,7 @@
     window.onload = async () => {
         const querySnapshot = await getDocs(collection(db, "courses"));
         querySnapshot.forEach((query) => {
-            // console.log(`${doc.id} => ${doc.data()}`);
-            const { CourseName, CourseSyllabus, CourseCredit } = query.data()
+            const { CourseName, CourseSyllabus, CourseCredit, MidExamScorePercentage, FinalExamScorePercentage, AssignmentScorePercentage } = query.data()
 
             let body = document.querySelector('#courses')
             let template = document.querySelector('#course-template')
@@ -64,14 +79,25 @@
             const course_name = clone.querySelector('#course-name')
             const course_syllabus = clone.querySelector('#course-syllabus')
             const course_credit = clone.querySelector('#course-credit')
+            const asg_score = clone.querySelector('#asg-score')
+            const mid_score = clone.querySelector('#mid-score')
+            const final_score = clone.querySelector('#final-score')
 
             course_name.textContent = CourseName
             course_syllabus.textContent = CourseSyllabus
-            course_credit.textContent = "Course Credit : " + CourseCredit
+            course_credit.textContent = CourseCredit
+            asg_score.textContent = AssignmentScorePercentage
+            mid_score.textContent = MidExamScorePercentage
+            final_score.textContent = FinalExamScorePercentage
 
-            clone.querySelector('#delete').addEventListener('click', () => {
-                await deleteDoc(doc(db, "cities", query.id));
+            clone.querySelector('#delete-btn').addEventListener('click', async () => {
+                await deleteDoc(doc(db, "courses", query.id));
                 window.location.reload()
+            });
+
+            clone.querySelector('#update-btn').addEventListener('click', async () => {
+                sessionStorage.setItem("currCourse", query.id);
+                window.location.assign('./update-course.html')
             });
 
             body.appendChild(clone)

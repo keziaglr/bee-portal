@@ -46,6 +46,10 @@
         document.querySelector('#loginBtn').addEventListener('click', async() => {
             if(studentNumber.value.charAt(0) === 'D'){
                 role = 'lecturers';
+            }else if(studentNumber.value.charAt(0) === 'A'){
+                role = 'admins'
+            }else if(studentNumber.value.charAt(0) === 'C'){
+                role = 'academics'
             }else{
                 role = 'students';
             }
@@ -58,6 +62,14 @@
                     sessionStorage.setItem("currRole", "Lecturer");
                     sessionStorage.setItem("currLecturer", studentNumber.value);
                     window.location.assign('./lecturer/view-teaching-schedule.html')
+                }else if(role == 'admins'){
+                    sessionStorage.setItem("currRole", "Admin");
+                    sessionStorage.setItem("currAdmin", studentNumber.value);
+                    window.location.assign('./administrative-department/admin-home.html')
+                }else if(role == 'academics'){
+                    sessionStorage.setItem("currRole", "Acad");
+                    sessionStorage.setItem("currAcad", studentNumber.value);
+                    window.location.assign('./academic-department/academic-home.html')
                 }else{
                     sessionStorage.setItem("currRole", "Student");
                     sessionStorage.setItem("currStudent", studentNumber.value);

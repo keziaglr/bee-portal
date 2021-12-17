@@ -7,54 +7,49 @@
   </head>
   <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container-fluid">
-            <a class="navbar-brand" href="">Bee Portal</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor03" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+          <div class="container-fluid">
+          <a class="navbar-brand" href="">Bee Portal</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor03" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+          </button>
 
-            <div class="collapse navbar-collapse" id="navbarColor03">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <li class="nav-item">
-                            <a class="nav-link" href="./view-teaching-schedule.html">View Teaching Schedule</a>
-                        </li>
+          <div class="collapse navbar-collapse" id="navbarColor03">
+              <ul class="navbar-nav me-auto">
+                  <li class="nav-item">
+                      <a class="nav-link" href="./view-class.html">View Class</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="./view-class-schedule.html">View Class Schedule</a>
                     </li>
-                </ul>
-                <ul style="list-style: none">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" id="menu" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Lecturer</a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="../login-page.html">Log Out</a>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            </div>
-        </nav>
-    </header>
+              </ul>
+              <ul style="list-style: none">
+                  <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" id="currUser" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Student</a>
+                      <div class="dropdown-menu">
+                          <a class="dropdown-item" href="../login-page.html">Log Out</a>
+                      </div>
+                  </li>
+              </ul>
+          </div>
+          </div>
+      </nav>
+  </header>
 
     <ul class="nav nav-tabs" style="margin-top: 50px;">
-        <li class="nav-item">
-          <a class="nav-link" href="./view-co.html">Course Outline</a>
+      <li class="nav-item">
+        <a class="nav-link" href="./view-lecturer-students.html">Course Syllabus</a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link active" href="./view-forum.html">Forum</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" href="./view-forum.html">Forum</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./view-student.html">Student</a>
-          </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Assignment</a>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" href="./view-assignment.html">Assignment</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="./create-assignment.html">Create Assignment</a>
-            <a class="dropdown-item" href="./create-group.html">Create Group</a>
-          </div>
+          <a class="nav-link" href="./view-lecturer-students.html">Lecturer & Students</a>
         </li>
-      </ul>
+        <li class="nav-item">
+          <a class="nav-link" href="./view-assignment.html">Assignment</a>
+        </li>
+    </ul>
       <div id="myTabContent" class="tab-content">
             <div class="form" style="margin: 50px 100px">
                 <div class="form-group">
@@ -83,7 +78,7 @@
     var ClassID = sessionStorage.getItem('currClassID');
 
     document.querySelector('#submitBtn').addEventListener('click', async() => {        
-        var userID =  sessionStorage.getItem('currLecturer');
+        var userID =  sessionStorage.getItem('currStudent');
 
         const docRef = await addDoc(collection(db, "forum"), {
             ClassID: ClassID,
