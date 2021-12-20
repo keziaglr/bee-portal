@@ -9,7 +9,7 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container-fluid">
-            <a class="navbar-brand" href="">Bee Portal</a>
+            <a class="navbar-brand" href="./academic-home.html">Bee Portal</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor03" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -65,32 +65,7 @@
                 <input type="text" class="form-control" name="text" id="final-score">
                 <label for="floatingInput">Final Exam Score Percentage</label>
             </div>
-            <label class="form-label mt-4" >Material 1</label>
-            <div class="form-floating">
-                <input type="text" class="form-control" name="text" id="mat1">
-                <label for="floatingInput">Material 1</label>
-            </div>
-            <label class="form-label mt-4" >Material 2</label>
-            <div class="form-floating">
-                <input type="text" class="form-control" name="text" id="mat2">
-                <label for="floatingInput">Material 2</label>
-            </div>
-            <label class="form-label mt-4" >Material 3</label>
-            <div class="form-floating">
-                <input type="text" class="form-control" name="text" id="mat3">
-                <label for="floatingInput">Material 3</label>
-            </div>
-            <label class="form-label mt-4" >Material 4</label>
-            <div class="form-floating">
-                <input type="text" class="form-control" name="text" id="mat4">
-                <label for="floatingInput">Material 4</label>
-            </div>
-            <label class="form-label mt-4" >Material 5</label>
-            <div class="form-floating">
-                <input type="text" class="form-control" name="text" id="mat5">
-                <label for="floatingInput">Material 5</label>
-            </div>
-            <input style="margin: 25px 0" type="submit" class="btn btn-primary" id="submitBtn" value="Submit">
+            <input style="margin: 25px 0" type="submit" class="btn btn-primary" id="submitBtn" value="Update">
             </div>
         </div>
     </div>
@@ -106,9 +81,14 @@
     window.onload = async() => {
         const docRef = doc(db, "courses", CourseID);
         const docSnap = await getDoc(docRef);
-        const { CourseName } = docSnap.data()
+        const { CourseName, CourseCredit, CourseSyllabus, AssignmentScorePercentage, MidExamScorePercentage, FinalExamScorePercentage } = docSnap.data()
         
         document.getElementById("course-name").setAttribute("value", CourseName);
+        document.getElementById("course-credit").setAttribute("value", CourseCredit);
+        document.getElementById("course-syllabus").setAttribute("value", CourseSyllabus);
+        document.getElementById("asg-score").setAttribute("value", AssignmentScorePercentage);
+        document.getElementById("mid-score").setAttribute("value", MidExamScorePercentage);
+        document.getElementById("final-score").setAttribute("value", FinalExamScorePercentage);
     }
     
     document.querySelector('#submitBtn').addEventListener('click', async() => {      
@@ -120,34 +100,11 @@
         var AsgScore = document.getElementById('asg-score').value;
         var MidScore = document.getElementById('mid-score').value;
         var FinalScore = document.getElementById('final-score').value;
-        var Material1 = document.getElementById('mat1').value;
-        var Material2 = document.getElementById('mat2').value;
-        var Material3 = document.getElementById('mat3').value;
-        var Material4 = document.getElementById('mat4').value;
-        var Material5 = document.getElementById('mat5').value;
         var materials = [];
 
         if(CourseName == "" || CourseCredit == "" || CourseSyllabus == "" || AsgScore == "" || MidScore == "" || FinalScore == ""){
             alert('Course data must be inserted!')
-        }else if(Material1 == "" && Material2 == "" && Material3=="" && Material4=="" && Material5==""){
-            alert('Material must be inserted min 1')
         }else{
-            if(Material1 != ""){
-                materials.push(Material1)
-            }
-            if(Material2 != ""){
-                materials.push(Material2)
-            }
-            if(Material3 != ""){
-                materials.push(Material3)
-            } 
-            if(Material4 != ""){
-                materials.push(Material4)
-            } 
-            if(Material5 != ""){
-                materials.push(Material5)
-            }
-
             const courseRef = doc(db, "courses", CourseID);
             await updateDoc(courseRef, {
                 CourseName: CourseName,
@@ -157,19 +114,6 @@
                 MidExamScorePercentage: MidScore,
                 FinalExamScorePercentage: FinalScore
             });
-
-            const q = query(collection(db, "courseSession"), where("CourseID", "==", CourseID));
-            const querySnapshot = await getDocs(q);
-            querySnapshot.forEach((query) => {
-                var sez = 1;
-                const { MaterialName, Session } = query.data()
-                const courseSessionRef = doc(db, "courseSession", query.id);
-                await updateDoc(courseSessionRef, {
-                    MaterialName: materials[i],
-                    Session: sez
-                });
-                sez++
-            })
         }  
         window.location.assign('./academic-home.html')
     })

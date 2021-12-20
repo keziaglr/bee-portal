@@ -66,14 +66,16 @@
                         <td scope="col" id="user">class code</td>
                         <td scope="col" id="title">course name</td>
                         <td scope="col" id="detail-btn"><button class="btn my-2 my-sm-0 btn-outline-dark" type="submit" id="detail-btn">Detail</button></td>
-                    </tr>
+                        <td scope="col" ><button style="display: none;" id="btn-update" type="button" class="btn btn-warning">Update</button>
+                        <button id="btn-delete" style="display: none;" type="button" class="btn btn-danger">Delete</button></td>
+                      </tr>
                 </template>
                 </tbody>
             </table>
         </div>
   </body>
   <script type="module">
-    import { addDoc, Firestore, collection, getDocs, getDoc, doc, getFirestore, query, where } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js'
+    import { addDoc, Firestore, collection, getDocs, getDoc, doc, getFirestore, query, where, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js'
     import { firebaseApp } from '../../firebase.js'
 
     const db = getFirestore(firebaseApp)
@@ -97,6 +99,33 @@
             clone.querySelector('#detail-btn').addEventListener('click', () => {
                 sessionStorage.setItem("currForum", query.id);
                 window.location.assign('./forum-detail.html')
+            });
+
+            if(UserID == sessionStorage.getItem('currStudent')){
+                clone.querySelector('#btn-delete').setAttribute("style", "display: block")
+                clone.querySelector('#btn-update').setAttribute("style", "display: block")
+            }
+
+            clone.querySelector('#btn-delete').addEventListener('click', async () => {
+                const docForum = await getDoc(doc(db, "forum", query.id));
+                const { UserID } = docForum.data()
+
+                if(UserID == sessionStorage.getItem('currStudent')){
+                    await deleteDoc(doc(db, "forum", query.id));
+                    window.location.reload()
+                }else{
+                    alert('Cannot delete')
+                }
+            });
+
+            clone.querySelector('#btn-update').addEventListener('click', async () => {
+                const docForum = await getDoc(doc(db, "forum", query.id));
+                const { UserID } = docForum.data()
+
+                if(UserID == sessionStorage.getItem('currStudent')){
+                    sessionStorage.setItem('currForum', query.id)
+                    window.location.assign('./update-forum.html')
+                }
             });
 
             body.appendChild(clone)

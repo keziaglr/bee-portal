@@ -63,102 +63,30 @@
             </template>
         </div>
 
-        <table class="table table-hover">
-            <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Comment</th>
-            </tr>
-            </thead>
-            <tbody id="forums">
-            <template id="forum-template">
-                <tr>
-                    <td scope="col" id="user">class code</td>
-                    <td scope="col" id="comment">course name</td>
-                    <td scope="col" ><button style="display: none;" id="btn-update" type="button" class="btn btn-link">Update</button></td>
-                    <td scope="col" ><button id="btn-delete" style="display: none;" type="button" class="btn-close"></button></td>
-                </tr>
-            </template>
-            </tbody>
-        </table>
-
         <div class="form-group">
             <div class="input-group mb-3">
                 <input type="text" id="comment-field" class="form-control" placeholder="Input Comment" aria-label="Input Comment" aria-describedby="button-addon2">
-                <button class="btn btn-primary" type="button" id="button-addon2">Comment</button>
+                <button class="btn btn-primary" type="button" id="button-addon2">Update</button>
             </div>
             </div>
         </div>
     </div>
   </body>
   <script type="module">
-    import { addDoc, Firestore, collection, getDocs, getDoc, doc, getFirestore, query, where, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js'
+    import { addDoc, Firestore, collection, getDocs, getDoc, doc, getFirestore, query, where, updateDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js'
     import { firebaseApp } from '../../firebase.js'
 
     const db = getFirestore(firebaseApp)
-    var ForumID = sessionStorage.getItem('currForum');
+    var ReplyID = sessionStorage.getItem('currReply');
 
     window.onload = async () => {
-        const docClass = await getDoc(doc(db, "forum", ForumID));
-        const { Title, UserID, Comment } = docClass.data()
-
-        let bodyForum = document.querySelector('#header-forum')
-        let templateForum = document.querySelector('#header-template')
-        const cloneForum = templateForum.content.cloneNode(true)
-        const title_header = cloneForum.querySelector('#forum-title')
-        const user_header = cloneForum.querySelector('#forum-user')
-        const comment_header = cloneForum.querySelector('#forum-comment')
-
-        title_header.textContent = Title
-        user_header.textContent = UserID
-        comment_header.textContent = Comment
-        
-        bodyForum.appendChild(cloneForum)
-
-        const q = query(collection(db, "forumDetail"), where("ForumID", "==", ForumID));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((query) => {
-            const { Comment, UserID } = query.data()
-
-            let body = document.querySelector('#forums')
-            let template = document.querySelector('#forum-template')
-            const clone = template.content.cloneNode(true)
-            const user = clone.querySelector('#user')
-            const comment = clone.querySelector('#comment')
-
-            user.textContent = UserID
-            comment.textContent = Comment
-
-
-            if(UserID == sessionStorage.getItem('currStudent')){
-                clone.querySelector('#btn-delete').setAttribute("style", "display: block")
-                clone.querySelector('#btn-update').setAttribute("style", "display: block")
-            }
-
-            clone.querySelector('#btn-delete').addEventListener('click', async () => {
-                const docForum = await getDoc(doc(db, "forumDetail", query.id));
-                const { UserID } = docForum.data()
-
-                if(UserID == sessionStorage.getItem('currStudent')){
-                    await deleteDoc(doc(db, "forumDetail", query.id));
-                    window.location.reload()
-                }else{
-                    alert('Cannot delete')
-                }
-            });
-
-            clone.querySelector('#btn-update').addEventListener('click', async () => {
-                sessionStorage.setItem('currReply', query.id)
-                window.location.assign('./update-forum-reply.html')
-            });
-
-            body.appendChild(clone)
-        });
-        
+        const forumReply = doc(db, "forumDetail", ReplyID);
+        const docSnap2 = await getDoc(forumReply);
+        const { Comment } = docSnap2.data()
+        document.getElementById('comment-field').setAttribute("value", Comment);  
     }
 
-    document.querySelector('#button-addon2').addEventListener('click', async() => {        
-        var userID =  sessionStorage.getItem('currStudent');
+    document.querySelector('#button-addon2').addEventListener('click', async() => {    
         const q = query(collection(db, "forumDetail"), where("Comment", "==", document.getElementById('comment-field').value));
         const querySnapshot = await getDocs(q);
         var flag = true;
@@ -171,16 +99,15 @@
         });
 
         if(flag == true){
-            const docRef = await addDoc(collection(db, "forumDetail"), {
-                ForumID: ForumID,
-                Comment: document.getElementById('comment-field').value,
-                UserID: userID
+            const replyRef = doc(db, "forumDetail", ReplyID);
+            await updateDoc(replyRef, {
+                Comment: document.getElementById('comment-field').value
             });
         }else{
             alert('Your reply forum is similar to another reply forum!');
         }
 
-        window.location.reload()
+        window.location.assign('./forum-detail.html')
     })
 
   </script>

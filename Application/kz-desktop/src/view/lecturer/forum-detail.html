@@ -20,15 +20,6 @@
                         <li class="nav-item">
                             <a class="nav-link" href="./view-teaching-schedule.html">View Teaching Schedule</a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Assignment</a>
-                            <div class="dropdown-menu">
-                              <a class="dropdown-item" href="./create-group-assignment.html">Create Group Assignment</a>
-                              <a class="dropdown-item" href="./create-individual-assignment.html">Create Individual Assignment</a>
-                              <div class="dropdown-divider"></div>
-                              <a class="dropdown-item" href="./create-group.html">Create Group</a>
-                            </div>
-                          </li>
                     </li>
                 </ul>
                 <ul style="list-style: none">
@@ -63,6 +54,12 @@
             <a class="dropdown-item" href="./create-group.html">Create Group</a>
           </div>
         </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Student Score</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="./submit-students-score.html">Submit Student Score</a>
+            </div>
+          </li>
       </ul>
       <div id="myTabContent" class="tab-content">
         <div id="header-forum" style="justify-content: center; margin: 50px 100px;">
@@ -89,6 +86,8 @@
                 <tr>
                     <td scope="col" id="user">class code</td>
                     <td scope="col" id="comment">course name</td>
+                    <td scope="col" ><button style="display: none;" id="btn-update" type="button" class="btn btn-link">Update</button></td>
+                    <td scope="col" ><button id="btn-delete" style="display: none;" type="button" class="btn-close"></button></td>
                 </tr>
             </template>
             </tbody>
@@ -104,15 +103,14 @@
     </div>
   </body>
   <script type="module">
-    import { addDoc, Firestore, collection, getDocs, getDoc, doc, getFirestore, query, where } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js'
+    import { addDoc, Firestore, collection, getDocs, getDoc, doc, getFirestore, query, where, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js'
     import { firebaseApp } from '../../firebase.js'
 
     const db = getFirestore(firebaseApp)
     var ForumID = sessionStorage.getItem('currForum');
 
     window.onload = async () => {
-        const q = query(collection(db, "forumDetail"), where("ForumID", "==", ForumID));
-        const querySnapshot = await getDocs(q);
+        const docClass = await getDoc(doc(db, "forum", ForumID));
         const { Title, UserID, Comment } = docClass.data()
 
         let bodyForum = document.querySelector('#header-forum')
@@ -128,7 +126,8 @@
         
         bodyForum.appendChild(cloneForum)
 
-        const querySnapshot = await getDocs(collection(db, "forumDetail"), where("ForumID", "==", ForumID));
+        const q = query(collection(db, "forumDetail"), where("ForumID", "==", ForumID));
+        const querySnapshot = await getDocs(q);
         querySnapshot.forEach((query) => {
             const { Comment, UserID } = query.data()
 
@@ -140,6 +139,29 @@
 
             user.textContent = UserID
             comment.textContent = Comment
+
+
+            if(UserID == sessionStorage.getItem('currLecturer')){
+                clone.querySelector('#btn-delete').setAttribute("style", "display: block")
+                clone.querySelector('#btn-update').setAttribute("style", "display: block")
+            }
+
+            clone.querySelector('#btn-delete').addEventListener('click', async () => {
+                const docForum = await getDoc(doc(db, "forumDetail", query.id));
+                const { UserID } = docForum.data()
+
+                if(UserID == sessionStorage.getItem('currLecturer')){
+                    await deleteDoc(doc(db, "forumDetail", query.id));
+                    window.location.reload()
+                }else{
+                    alert('Cannot delete')
+                }
+            });
+
+            clone.querySelector('#btn-update').addEventListener('click', async () => {
+                sessionStorage.setItem('currReply', query.id)
+                window.location.assign('./update-forum-reply.html')
+            });
 
             body.appendChild(clone)
         });

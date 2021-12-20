@@ -38,7 +38,7 @@
         import { Firestore, getDoc, doc, getFirestore } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js'
         import { firebaseApp } from '../firebase.js'
         let studentNumber = document.getElementById('student-number')
-        let password = document.getElementById('student-password')
+        let pass = document.getElementById('student-password')
       
         const db = getFirestore(firebaseApp)
         let role = '';
@@ -50,33 +50,49 @@
                 role = 'admins'
             }else if(studentNumber.value.charAt(0) === 'C'){
                 role = 'academics'
+            }else if(studentNumber.value.charAt(0) === 'P'){
+                role = 'proctors'
+            }else if(studentNumber.value.charAt(0) === 'S'){
+                role = 'scorings'
             }else{
                 role = 'students';
             }
 
             const docRef = doc(db, role, studentNumber.value);
             const docSnap = await getDoc(docRef);
-    
-            if (docSnap.exists()) {
-                if(role == 'lecturers'){
-                    sessionStorage.setItem("currRole", "Lecturer");
-                    sessionStorage.setItem("currLecturer", studentNumber.value);
-                    window.location.assign('./lecturer/view-teaching-schedule.html')
-                }else if(role == 'admins'){
-                    sessionStorage.setItem("currRole", "Admin");
-                    sessionStorage.setItem("currAdmin", studentNumber.value);
-                    window.location.assign('./administrative-department/admin-home.html')
-                }else if(role == 'academics'){
-                    sessionStorage.setItem("currRole", "Acad");
-                    sessionStorage.setItem("currAcad", studentNumber.value);
-                    window.location.assign('./academic-department/academic-home.html')
-                }else{
-                    sessionStorage.setItem("currRole", "Student");
-                    sessionStorage.setItem("currStudent", studentNumber.value);
-                    window.location.assign('./student/view-class.html')
+            if(docSnap.exists()){
+                const { Password } = docSnap.data()
+                if (Password == pass.value) {
+                    if(role == 'lecturers'){
+                        sessionStorage.setItem("currRole", "Lecturer");
+                        sessionStorage.setItem("currLecturer", studentNumber.value);
+                        window.location.assign('./lecturer/view-teaching-schedule.html')
+                    }else if(role == 'admins'){
+                        sessionStorage.setItem("currRole", "Admin");
+                        sessionStorage.setItem("currAdmin", studentNumber.value);
+                        window.location.assign('./administrative-department/admin-home.html')
+                    }else if(role == 'academics'){
+                        sessionStorage.setItem("currRole", "Acad");
+                        sessionStorage.setItem("currAcad", studentNumber.value);
+                        window.location.assign('./academic-department/academic-home.html')
+                    }else if(role == 'scorings'){
+                        sessionStorage.setItem("currRole", "Scoring");
+                        sessionStorage.setItem("currScoring", studentNumber.value);
+                        window.location.assign('./scoring-department/home.html')
+                    }else if(role == 'proctors'){
+                        // sessionStorage.setItem("currRole", "Student");
+                        // sessionStorage.setItem("currStudent", studentNumber.value);
+                        // window.location.assign('./student/view-class.html')
+                    }else{
+                        sessionStorage.setItem("currRole", "Student");
+                        sessionStorage.setItem("currStudent", studentNumber.value);
+                        window.location.assign('./student/view-class.html')
+                    }
+                } else {
+                    alert("Wrong Password");
                 }
-            } else {
-                alert("Invalid Account!");
+            }else{
+                alert("Wrong ID")
             }
         });
 

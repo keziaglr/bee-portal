@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+    <link rel="stylesheet" href="https://bootswatch.com/5/lux/bootstrap.min.css">
+  </head>
+  <body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+            <a class="navbar-brand" href="">Bee Portal</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor03" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarColor03">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="./home.html">Home</a>
+                    </li>
+                </ul>
+                <ul style="list-style: none">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" id="currUser" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Administrative Department</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="../login-page.html">Log Out</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            </div>
+        </nav>
+    </header>
+    <div style="margin-top: 75px;">
+        <h2 style="margin-top: 75px;"> <strong class="d-flex justify-content-center" >Student Score</strong> </h2>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Student ID</th>
+                <th scope="col">Student Name</th>
+                <th scope="col">Assignment Score</th>
+                <th scope="col">Mid Exam Score</th>
+                <th scope="col">Final Exam Score</th>
+                <th scope="col">Notes</th>
+                <th scope="col">Status</th>
+            </tr>
+            </thead>
+            <tbody id="stud">
+            <template id="stud-template">
+                <tr>
+                    <td scope="col" id="stud-id">class code</td>
+                    <td scope="col" id="stud-name">course name</td>
+                    <td scope="col" id="asg-score">a</td>
+                    <td scope="col" id="mid-score">a</td>
+                    <td scope="col" id="final-score">a</td>
+                    <td scope="col" id="notes">a</td>
+                    <td scope="col" id="status">a</td>
+                    <td scope="col" id="-">
+                        <button class="btn my-2 my-sm-0 btn-outline-dark" type="submit" id="submit-btn">Finalize</button>
+                        <button class="btn my-2 my-sm-0 btn-outline-dark" style="display: none;" type="submit" id="approve-btn">Approve</button>
+                        <button class="btn my-2 my-sm-0 btn-outline-dark" style="display: none;"  type="submit" id="decline-btn">Decline</button>
+                    </td>
+                </tr>
+            </template>
+            </tbody>
+        </table>
+      
+      </div>
+  </body>
+  <script type="module">
+    import { Firestore, collection, getDocs, getDoc, doc, query, getFirestore, where, updateDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js'
+    import { firebaseApp } from '../../firebase.js'
+
+    const db = getFirestore(firebaseApp);
+    
+    window.onload = async () => {
+        var ClassID = sessionStorage.getItem('currClassID');
+        var StudentNum = sessionStorage.getItem('currStudent')
+        const q = query(collection(db, "classDetail"), where("ClassID", "==", ClassID));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((query) => {
+            const { StudentNumber, AssignmentScore, MidExamScore, FinalExamScore, ScoreStatus, Notes } = query.data()
+            
+            async function test(){
+                const docStud = await getDoc(doc(db, "students", StudentNumber));
+                const { StudentName } = docStud.data()
+
+                let bodyStud = document.querySelector('#stud')
+                let templateStud = document.querySelector('#stud-template')
+                const cloneStud = templateStud.content.cloneNode(true)
+                const stud_id = cloneStud.querySelector('#stud-id')
+                const stud_name = cloneStud.querySelector('#stud-name')
+                const asgScore = cloneStud.querySelector('#asg-score')
+                const midScore = cloneStud.querySelector('#mid-score')
+                const finalScore = cloneStud.querySelector('#final-score')
+                const status = cloneStud.querySelector('#status')
+                const notes = cloneStud.querySelector('#notes')
+
+                stud_id.textContent = StudentNumber
+                stud_name.textContent = StudentName
+                midScore.textContent = MidExamScore
+                finalScore.textContent = FinalExamScore
+                asgScore.textContent = AssignmentScore
+                status.textContent = ScoreStatus
+                notes.textContent = Notes
+
+                if(ScoreStatus == "Submitted"){
+                  cloneStud.querySelector('#submit-btn').addEventListener('click', async() => {    
+                    const classRef = doc(db, "classDetail", query.id);
+                    await updateDoc(classRef, {
+                        ScoreStatus: "Finalized"
+                    });
+                    window.location.reload()
+                  })
+                }
+                if(ScoreStatus == "Finalized" || ScoreStatus == "Check"){
+                  cloneStud.querySelector('#submit-btn').setAttribute("style", "display:none")
+                }else if(ScoreStatus == "Protest"){
+                    cloneStud.querySelector('#submit-btn').setAttribute("style", "display:none")
+                    cloneStud.querySelector('#approve-btn').setAttribute("style", "display:block")
+                    cloneStud.querySelector('#decline-btn').setAttribute("style", "display:block")
+
+                    cloneStud.querySelector('#decline-btn').addEventListener('click',async() => {    
+                        const classRef = doc(db, "classDetail", query.id);
+                        await updateDoc(classRef, {
+                            ScoreStatus: "Finalized"
+                        });
+                        window.location.reload()
+                    });
+
+                    cloneStud.querySelector('#approve-btn').addEventListener('click',async() => {    
+                        const classRef = doc(db, "classDetail", query.id);
+                        await updateDoc(classRef, {
+                            ScoreStatus: "Check"
+                        });
+                        window.location.reload()
+                    });
+                }
+
+                bodyStud.appendChild(cloneStud)
+            }
+            test().catch((e)=>{
+                console.log(e.message)
+            });
+        })
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</html>

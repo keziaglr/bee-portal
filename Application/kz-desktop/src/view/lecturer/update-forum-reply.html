@@ -40,13 +40,13 @@
           <a class="nav-link" href="./view-co.html">Course Outline</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="./view-forum.html">Forum</a>
+            <a class="nav-link active" href="./view-forum.html">Forum</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="./view-student.html">Student</a>
           </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle active" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Assignment</a>
+          <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Assignment</a>
           <div class="dropdown-menu">
             <a class="dropdown-item" href="./view-assignment.html">Assignment</a>
             <div class="dropdown-divider"></div>
@@ -62,74 +62,49 @@
         </li>
       </ul>
       <div id="myTabContent" class="tab-content">
-            <div class="form" style="margin: 50px 100px">
-                <div class="form-group">
-                    <h2> <strong class="d-flex justify-content-center" style="margin-top: 75px;" >Create Assignment</strong> </h2>
-                    <label class="form-label mt-4" >Title</label>
-                    <div class="form-floating">
-                        <input type="text" class="form-control" name="text" id="title-asg">
-                        <label for="floatingInput">Title</label>
-                    </div>
-                    <label class="form-label mt-4" >Case</label>
-                    <div class="form-floating">
-                        <input type="text" class="form-control" name="text" id="case-asg">
-                        <label for="floatingInput">Case</label>
-                    </div>
-                    <div class="form-group">
-                      <label for="exampleSelect1" class="form-label mt-4">Assignment</label>
-                      <select class="form-select" id="asg-jenis">
-                        <option value="Groupaa">Groupaaa</option>
-                        <option value="Individual">Individual</option>
-                      </select>
-                    </div>
-                    </div>
-                    <input style="margin: 25px 0" type="submit" class="btn btn-primary" id="submitBtn" value="Submit">
-                </div>
+        <div id="header-forum" style="justify-content: center; margin: 50px 100px;">
+            <template id="header-template" class="text-center">
+                <h4 id="forum-title"></h4>
+                <blockquote id="forum-comment" class="blockquote">
+                    <p class="mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+                </blockquote>
+                <figcaption id="forum-user" class="blockquote-footer">
+                User
+                </figcaption>
+            </template>
+        </div>
+
+        <div class="form-group">
+            <div class="input-group mb-3">
+                <input type="text" id="comment-field" class="form-control" placeholder="Input Comment" aria-label="Input Comment" aria-describedby="button-addon2">
+                <button class="btn btn-primary" type="button" id="button-addon2">Update</button>
+            </div>
             </div>
         </div>
+    </div>
   </body>
   <script type="module">
-    import { addDoc, Firestore, collection, getDocs, getDoc, doc, getFirestore, query, where } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js'
+    import { addDoc, Firestore, collection, getDocs, getDoc, doc, getFirestore, query, where, updateDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js'
     import { firebaseApp } from '../../firebase.js'
 
     const db = getFirestore(firebaseApp)
-    var ClassID = sessionStorage.getItem('currClassID');
-    
-    document.querySelector('#submitBtn').addEventListener('click', async() => {       
-      var asg = document.getElementById('asg-jenis').value
-      if(asg == "Individual"){
-        console.log('Individual')
-        const docRef = await addDoc(collection(db, "individualAssignment"), {
-            ClassID: ClassID,
-            Title: document.getElementById('title-asg').value,
-            Case: document.getElementById('case-asg').value,
-            Answer: 'asd'
-        })
-      }else if(asg == "Group"){
-        console.log('Group')
-        const q = query(collection(db, "group"), where("ClassID", "==", ClassID));
+    var ReplyID = sessionStorage.getItem('currReply');
 
-        const querySnapshot = await getDocs(q);
-        var flag = false;
-        querySnapshot.forEach((doc) => {
-            if(doc.data() != null){
-                flag = true
-            }
+    window.onload = async () => {
+        const forumReply = doc(db, "forumDetail", ReplyID);
+        const docSnap2 = await getDoc(forumReply);
+        const { Comment } = docSnap2.data()
+        document.getElementById('comment-field').setAttribute("value", Comment);  
+    }
+
+    document.querySelector('#button-addon2').addEventListener('click', async() => {    
+
+        const replyRef = doc(db, "forumDetail", ReplyID);
+        await updateDoc(replyRef, {
+            Comment: document.getElementById('comment-field').value
         });
 
-        if(flag == true) {
-          const docRef = await addDoc(collection(db, "groupAssignment"), {
-              ClassID: ClassID,
-              Title: document.getElementById('title-asg').value,
-              Case: document.getElementById('case-asg').value,
-              Answer: 'asd'
-          })
-        }else{
-          alert('You must create group first!')
-          window.location.assign('./create-group.html')
-        }
-      }
-        window.location.assign('./view-assignment.html')
+        window.location.assign('./forum-detail.html')
     })
 
   </script>
